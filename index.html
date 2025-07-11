@@ -133,113 +133,20 @@
 </div>
 
 <script>
-    // --- 주요 요소 가져오기 ---
     const uidInput = document.getElementById('uid');
     const registerAllBtn = document.getElementById('register-all-btn');
     const couponListDiv = document.getElementById('coupon-list');
     const couponCountSpan = document.getElementById('coupon-count');
 
-    let coupons = []; // 서버에서 받아온 쿠폰 목록을 저장할 배열
+    let coupons = []; 
 
-    // --- 초기화 및 서버에서 쿠폰 목록 가져오기 ---
     async function initialize() {
         try {
-            // 서버의 /api/coupons 엔드포인트에 요청을 보내 쿠폰 목록을 가져옵니다.
             const response = await fetch('/api/coupons');
             if (!response.ok) {
                 throw new Error('서버에서 쿠폰 목록을 가져오는데 실패했습니다.');
             }
             coupons = await response.json();
-
-            // 쿠폰 목록 UI 생성
             renderCouponList();
 
         } catch (error) {
-            couponListDiv.innerHTML = `<div class="loader" style="color: #ff5252;">${error.message}</div>`;
-            console.error(error);
-        }
-    }
-    
-    // --- 쿠폰 목록을 화면에 그리는 함수 ---
-    function renderCouponList() {
-        couponListDiv.innerHTML = ''; // 기존 목록 초기화
-        if (coupons.length === 0) {
-            couponListDiv.innerHTML = '<div class="loader">등록할 쿠폰이 없습니다.</div>';
-            return;
-        }
-
-        coupons.forEach((coupon, index) => {
-            const couponItem = document.createElement('div');
-            couponItem.className = 'coupon-item';
-            couponItem.id = `coupon-${index}`;
-            couponItem.innerHTML = `
-                <div class="coupon-info">${coupon.name}</div>
-                <div class="coupon-status" id="status-${index}"></div>
-            `;
-            couponListDiv.appendChild(couponItem);
-        });
-        // 총 쿠폰 개수 표시
-        couponCountSpan.textContent = `총 ${coupons.length}개`;
-    }
-
-
-    // --- UID 입력 감지 ---
-    uidInput.addEventListener('input', () => {
-        if (uidInput.value.trim() !== '' && coupons.length > 0) {
-            registerAllBtn.disabled = false;
-        } else {
-            registerAllBtn.disabled = true;
-        }
-    });
-
-    // --- '전체 등록' 버튼 클릭 이벤트 ---
-    registerAllBtn.addEventListener('click', async () => {
-        const uid = uidInput.value.trim();
-        if (!uid) {
-            alert('UID를 입력해주세요.');
-            return;
-        }
-
-        registerAllBtn.disabled = true;
-        registerAllBtn.textContent = '모든 쿠폰 등록 진행 중...';
-
-        for (let i = 0; i < coupons.length; i++) {
-            const coupon = coupons[i];
-            const statusDiv = document.getElementById(`status-${i}`);
-            
-            statusDiv.textContent = '처리 중...';
-            statusDiv.className = 'coupon-status status-processing';
-
-            try {
-                const response = await fetch('/api/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ uid: uid, couponCode: coupon.code }),
-                });
-
-                const result = await response.json();
-
-                if (response.ok) {
-                    statusDiv.textContent = '등록 성공';
-                    statusDiv.className = 'coupon-status status-success';
-                } else {
-                    statusDiv.textContent = `실패: ${result.message || '알 수 없는 오류'}`;
-                    statusDiv.className = 'coupon-status status-fail';
-                }
-            } catch (error) {
-                statusDiv.textContent = '실패: 서버 통신 오류';
-                statusDiv.className = 'coupon-status status-fail';
-            }
-            
-            await new Promise(resolve => setTimeout(resolve, 300));
-        }
-
-        registerAllBtn.textContent = '전체 쿠폰 등록 완료';
-    });
-    
-    // --- 페이지 로드 시 초기화 실행 ---
-    initialize();
-</script>
-
-</body>
-</html>
