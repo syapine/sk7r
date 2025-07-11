@@ -3,230 +3,243 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>세나 리버스 쿠폰 자동 등록기</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
-        body {
-            font-family: 'Noto Sans KR', sans-serif;
-            background-color: #1a1a2e;
-            color: #e0e0e0;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+    <title>쿠폰 자동 등록 시스템</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+    /* --- 배경 이미지 추가 --- */
+    body { 
+        font-family: 'Noto Sans KR', sans-serif;
+        /* ▼▼▼ 이 부분을 아래와 같이 수정하세요 ▼▼▼ */
+        background-image: url('./images/seven2.png'); /* './'는 현재 폴더를 의미합니다 */
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed; /* 스크롤 시 배경은 고정 */
+    }
+    /* ... (나머지 스타일 코드는 그대로) ... */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
         }
-        .container {
-            width: 100%;
-            max-width: 500px;
-            background-color: #162447;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-            border: 1px solid #1f4068;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
-        h1 {
-            color: #13E2DA;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-        p {
-            text-align: center;
-            margin-bottom: 30px;
-            color: #b3c5ef;
-        }
-        .input-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 700;
-            color: #e0e0e0;
-        }
-        input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            background-color: #1a1a2e;
-            border: 1px solid #1f4068;
-            border-radius: 8px;
-            color: #e0e0e0;
-            font-size: 16px;
-            box-sizing: border-box;
-        }
-        #register-all-btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(90deg, #13E2DA, #1E90FF);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        #register-all-btn:disabled {
-            background: #555;
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-        #register-all-btn:not(:disabled):hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(25, 220, 210, 0.3);
-        }
-        .coupon-list-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid #1f4068;
-            padding-bottom: 10px;
-            margin-top: 30px;
-        }
-        .coupon-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            background-color: #1a1a2e;
-            border-radius: 8px;
-            margin-top: 10px;
-            transition: background-color 0.3s;
-        }
-        .coupon-info {
-            font-weight: 700;
-        }
-        .coupon-status {
-            font-weight: 700;
-        }
-        .status-processing { color: #f9a826; }
-        .status-success { color: #13E2DA; }
-        .status-fail { color: #ff5252; }
     </style>
 </head>
-<body>
+<body class="bg-slate-100">
+    <div class="container mx-auto max-w-xl p-4 sm:p-8">
+        <header class="text-center mb-8">
+            <!-- ▼▼▼ 제목을 수정했습니다 ▼▼▼ -->
+            <h1 class="text-3xl sm:text-4xl font-bold text-slate-900 drop-shadow-lg">쿠폰 자동등록 시스템</h1>
+            <!-- ▼▼▼ 문구 색상을 검은색으로 변경했습니다 ▼▼▼ -->
+            <p class="text-slate-900 mt-2 font-medium drop-shadow-lg">UID만 입력하면 쿠폰이 바로 등록됩니다.</p>
+        </header>
 
-<div class="container">
-    <h1>쿠폰 자동등록 시스템</h1>
-    <p>UID만 입력하고 버튼을 누르면 모든 쿠폰이 바로 등록됩니다.</p>
+        <!-- ▼▼▼ 메인 컨텐츠를 감싸는 div 추가 ▼▼▼ -->
+        <div id="main-content">
+            <!-- Input Section: 반투명 배경 및 블러 효과 추가 -->
+            <div class="bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-lg mb-6">
+                <div class="space-y-4">
+                    <div>
+                        <label for="user-id" class="block text-sm font-medium text-slate-700 mb-1">고객 ID (UID)</label>
+                        <input type="text" id="user-id" placeholder="넷마블 UID를 입력하세요" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <button id="load-coupons-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-all">
+                        등록 가능한 쿠폰 불러오기
+                    </button>
+                </div>
+            </div>
 
-    <div class="input-group">
-        <label for="uid">고객 ID (UID)</label>
-        <input type="text" id="uid" placeholder="UID를 여기에 입력하세요">
-    </div>
-
-    <button id="register-all-btn" disabled>전체 쿠폰 등록 시작</button>
-
-    <div class="coupon-list-header">
-        <h2>쿠폰 목록</h2>
-        <span id="coupon-count"></span>
-    </div>
-    <div id="coupon-list">
+            <!-- Coupon List Section -->
+            <div>
+                <!-- ▼▼▼ 쿠폰 개수를 표시하는 영역을 추가했습니다 ▼▼▼ -->
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-2xl font-semibold text-slate-900 drop-shadow-lg">쿠폰 목록</h2>
+                    <span id="coupon-count" class="text-lg font-medium text-white drop-shadow-lg"></span>
+                </div>
+                <div id="coupon-list" class="space-y-3">
+                    <!-- Coupons will be dynamically inserted here -->
+                </div>
+            </div>
         </div>
-</div>
+        
+        <!-- ▼▼▼ 오류 메시지 및 초기 안내 메시지 표시 영역 (기본적으로 숨김) ▼▼▼ -->
+        <div id="info-message" class="hidden bg-white/80 backdrop-blur-sm text-center p-8 rounded-xl shadow-lg">
+            <p class="text-slate-500"></p>
+        </div>
+    </div>
 
-<script>
-    // --- 쿠폰 데이터 ---
-    // 여기에 등록할 쿠폰 목록을 추가하거나 수정하세요.
-    const coupons = [
-        { name: "대보물시대", code: "WELCOMESENA" },
-        { name: "대보물시대", code: "RINKARMA" },
-        { name: "대보물시대", code: "7777777" },
-        { name: "대보물시대", code: "CMKARMA" },
-        // { name: "새 쿠폰", code: "NEWCOUPON123" },
-    ];
+    <script type="module">
+        // Firebase SDK - Firestore 데이터 조회를 위해 필요합니다.
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // --- 주요 요소 가져오기 ---
-    const uidInput = document.getElementById('uid');
-    const registerAllBtn = document.getElementById('register-all-btn');
-    const couponListDiv = document.getElementById('coupon-list');
-    const couponCountSpan = document.getElementById('coupon-count');
+        // --- DOM Elements ---
+        const userIdInput = document.getElementById('user-id');
+        const loadCouponsBtn = document.getElementById('load-coupons-btn');
+        const couponList = document.getElementById('coupon-list');
+        const infoMessageContainer = document.getElementById('info-message');
+        const infoMessageText = infoMessageContainer.querySelector('p');
+        const couponCount = document.getElementById('coupon-count');
+        const mainContent = document.getElementById('main-content');
 
-    // --- 초기화 함수 ---
-    function initialize() {
-        // 쿠폰 목록 UI 생성
-        coupons.forEach((coupon, index) => {
-            const couponItem = document.createElement('div');
-            couponItem.className = 'coupon-item';
-            couponItem.id = `coupon-${index}`;
-            couponItem.innerHTML = `
-                <div class="coupon-info">${coupon.name} (${coupon.code})</div>
-                <div class="coupon-status" id="status-${index}"></div>
-            `;
-            couponListDiv.appendChild(couponItem);
-        });
-        // 총 쿠폰 개수 표시
-        couponCountSpan.textContent = `총 ${coupons.length}개`;
-    }
+        // --- Configuration ---
+        // ▼▼▼ 여기에 Firebase 콘솔에서 복사한 firebaseConfig 객체만 정확히 붙여넣어야 합니다. ▼▼▼
+        const firebaseConfig = {
+            apiKey: "AIzaSyB6vd4gda-k10ZyAqzkQn_iPccYe8d9DKk",
+            authDomain: "sk7re-9eefb.firebaseapp.com",
+            projectId: "sk7re-9eefb",
+            storageBucket: "sk7re-9eefb.appspot.com",
+            messagingSenderId: "688256773743",
+            appId: "1:688256773743:web:bdb2dc99b91733e72ee79a",
+            measurementId: "G-209Q0P7X65"
+        };
 
-    // --- UID 입력 감지 ---
-    uidInput.addEventListener('input', () => {
-        // UID가 입력되어야만 등록 버튼 활성화
-        if (uidInput.value.trim() !== '') {
-            registerAllBtn.disabled = false;
+        // 🚨 중요! 위 firebaseConfig 객체의 projectId 값을 아래 appId 변수에 한 번 더 입력해주세요. 🚨
+        // ▼▼▼ 따옴표가 누락되어 있던 부분을 수정했습니다. ▼▼▼
+        const appId = "appid";
+        
+        // =================================================================================
+        // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
+        // 중요! 2단계에서 백엔드 배포 후 얻은 Cloud Function URL을 여기에 붙여넣으세요.
+        const cloudFunctionUrl = 'https://sk7r.vercel.app/api/register';
+        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+        // =================================================================================
+
+        let db;
+
+        // ▼▼▼ Firebase 설정 정보가 비어있는지 확인하는 로직을 강화했습니다. ▼▼▼
+        if (!firebaseConfig.apiKey) {
+            const errorMessage = "시스템 설정 오류! 이 웹사이트의 소스 코드(index.html)를 열고 'firebaseConfig' 변수를 당신의 Firebase 프로젝트 정보로 채워주세요. 이 정보는 Firebase 콘솔의 '프로젝트 설정'에서 찾을 수 있습니다.";
+            console.error(errorMessage);
+            mainContent.style.display = 'none'; // 메인 컨텐츠 숨기기
+            infoMessageContainer.classList.remove('hidden');
+            infoMessageContainer.classList.add('bg-red-100', 'border-l-4', 'border-red-500', 'text-red-700'); // 오류 스타일 적용
+            infoMessageText.textContent = errorMessage;
         } else {
-            registerAllBtn.disabled = true;
+             try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                infoMessageContainer.classList.remove('hidden');
+                infoMessageText.textContent = 'UID를 입력하고 쿠폰을 등록하세요.';
+             } catch (e) {
+                console.error("Firebase 초기화 실패", e);
+                mainContent.style.display = 'none';
+                infoMessageContainer.classList.remove('hidden');
+                infoMessageContainer.classList.add('bg-red-100', 'border-l-4', 'border-red-500', 'text-red-700');
+                infoMessageText.textContent = '시스템 초기화에 실패했습니다. Firebase 설정 정보를 다시 확인해주세요.';
+            }
         }
-    });
 
-    // --- '전체 등록' 버튼 클릭 이벤트 ---
-    registerAllBtn.addEventListener('click', async () => {
-        const uid = uidInput.value.trim();
-        if (!uid) {
-            alert('UID를 입력해주세요.');
-            return;
-        }
-
-        // 버튼 비활성화 (중복 실행 방지)
-        registerAllBtn.disabled = true;
-        registerAllBtn.textContent = '모든 쿠폰 등록 진행 중...';
-
-        // 모든 쿠폰을 순서대로 등록
-        for (let i = 0; i < coupons.length; i++) {
-            const coupon = coupons[i];
-            const statusDiv = document.getElementById(`status-${i}`);
+        async function loadAndRenderCoupons() {
+            if (!db) {
+                alert('데이터베이스에 연결되지 않았습니다. Firebase 설정을 확인해주세요.');
+                return;
+            }
             
-            // 1. 상태를 '처리 중'으로 변경
-            statusDiv.textContent = '처리 중...';
-            statusDiv.className = 'coupon-status status-processing';
+            infoMessageText.textContent = '쿠폰을 불러오는 중...';
+            infoMessageContainer.classList.remove('hidden');
+            couponList.innerHTML = '';
+            couponCount.textContent = ''; // 이전 개수 초기화
 
             try {
-                // 2. 서버에 쿠폰 등록 요청
-                const response = await fetch('/api/register', {
+                const couponsCollectionPath = `/artifacts/${appId}/public/data/coupons`;
+                const q = query(collection(db, couponsCollectionPath));
+                const querySnapshot = await getDocs(q);
+                const coupons = [];
+                querySnapshot.forEach((doc) => coupons.push({ id: doc.id, ...doc.data() }));
+
+                couponCount.textContent = `총 ${coupons.length}개`;
+
+                if (coupons.length === 0) {
+                    infoMessageContainer.classList.remove('hidden');
+                    infoMessageText.textContent = '등록된 쿠폰이 없습니다. 관리자가 쿠폰을 추가해야 합니다.';
+                } else {
+                    infoMessageContainer.classList.add('hidden');
+                    renderCoupons(coupons);
+                }
+            } catch (error) {
+                console.error("쿠폰 로딩 오류: ", error);
+                infoMessageText.textContent = '쿠폰을 불러오는 중 오류가 발생했습니다.';
+                infoMessageContainer.classList.remove('hidden');
+            }
+        }
+
+        function renderCoupons(coupons) {
+            couponList.innerHTML = '';
+            coupons.forEach(coupon => {
+                const couponEl = document.createElement('div');
+                couponEl.className = 'bg-white/80 backdrop-blur-sm p-4 rounded-lg shadow-lg flex items-center justify-between gap-3';
+                couponEl.innerHTML = `
+                    <div class="flex-grow">
+                        <p class="font-semibold text-slate-800">${coupon.desc || '이름 없는 쿠폰'}</p>
+                        <p class="text-sm text-slate-500 font-mono">${coupon.code}</p>
+                    </div>
+                    <button data-code="${coupon.code}" class="register-btn flex-shrink-0 bg-green-600 text-white text-sm font-bold py-2 px-4 rounded-md hover:bg-green-700 transition-all">등록</button>
+                    <div class="status-indicator hidden w-24 text-sm text-center"></div>
+                `;
+                couponList.appendChild(couponEl);
+            });
+        }
+
+        async function registerCoupon(button) {
+            const uid = userIdInput.value.trim();
+            if (!uid) {
+                alert('고객 ID (UID)를 먼저 입력해주세요!');
+                userIdInput.focus();
+                return;
+            }
+            
+            if (cloudFunctionUrl === 'YOUR_CLOUD_FUNCTION_URL_HERE') {
+                alert('오류: Cloud Function URL이 설정되지 않았습니다. 관리자에게 문의하세요.');
+                return;
+            }
+
+            const couponCode = button.dataset.code;
+            const statusEl = button.nextElementSibling;
+
+            button.classList.add('hidden');
+            statusEl.classList.remove('hidden', 'text-green-600', 'text-red-600');
+            statusEl.innerHTML = '<div class="loader mx-auto"></div>';
+
+            try {
+                const response = await fetch(cloudFunctionUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ uid: uid, coupon: coupon.code }),
+                    body: JSON.stringify({ uid: uid, couponCode: couponCode })
                 });
 
                 const result = await response.json();
 
-                // 3. 결과에 따라 상태 업데이트
-                if (response.ok) {
-                    statusDiv.textContent = '등록 성공';
-                    statusDiv.className = 'coupon-status status-success';
+                if (response.ok && result.success) {
+                    statusEl.textContent = '등록 성공!';
+                    statusEl.className = 'status-indicator w-24 text-sm text-center font-bold text-green-600';
                 } else {
-                    // 서버가 보낸 오류 메시지(예: 이미 사용된 쿠폰) 표시
-                    statusDiv.textContent = `실패: ${result.message || '알 수 없는 오류'}`;
-                    statusDiv.className = 'coupon-status status-fail';
+                    button.classList.remove('hidden');
+                    statusEl.classList.add('hidden');
+                    alert(`등록 실패: ${result.message || '알 수 없는 오류'}`);
                 }
             } catch (error) {
-                // 네트워크 오류 등 예외 발생 시
-                statusDiv.textContent = '실패: 서버 통신 오류';
-                statusDiv.className = 'coupon-status status-fail';
+                console.error('자동 등록 함수 호출 오류:', error);
+                button.classList.remove('hidden');
+                statusEl.classList.add('hidden');
+                alert('자동 등록 중 오류가 발생했습니다. 서버 상태를 확인해주세요.');
             }
-            
-            // 다음 쿠폰 등록 전 잠시 대기 (서버 부담 감소)
-            await new Promise(resolve => setTimeout(resolve, 300));
         }
 
-        // 모든 작업 완료 후 버튼 텍스트 원상복구
-        registerAllBtn.textContent = '전체 쿠폰 등록 완료';
-    });
-    
-    // --- 페이지 로드 시 초기화 실행 ---
-    initialize();
-</script>
-
+        loadCouponsBtn.addEventListener('click', loadAndRenderCoupons);
+        couponList.addEventListener('click', (e) => {
+            if (e.target.classList.contains('register-btn')) {
+                registerCoupon(e.target);
+            }
+        });
+    </script>
 </body>
 </html>
