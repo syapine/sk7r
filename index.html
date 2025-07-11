@@ -77,4 +77,124 @@
         }
         .register-btn {
             padding: 8px 12px;
-            background: linear-gradient(90deg
+            background: linear-gradient(90deg, #13E2DA, #1E90FF);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .register-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(25, 220, 210, 0.25);
+        }
+        .register-btn:disabled {
+             background: #555;
+             cursor: not-allowed;
+             opacity: 0.6;
+        }
+        .loader {
+            text-align: center;
+            padding: 20px;
+            color: #b3c5ef;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>세븐나이츠 리버스 쿠폰 자동 입력기</h1>
+    <p>UID를 입력하고, 등록할 쿠폰의 버튼을 누르세요.</p>
+
+    <div class="input-group">
+        <label for="uid">회원번호 (UID)</label>
+        <input type="text" id="uid" placeholder="UID를 여기에 입력하세요">
+    </div>
+
+    <div class="coupon-list-header">
+        <h2>사용 가능한 쿠폰 목록</h2>
+        <span id="coupon-count"></span>
+    </div>
+    <div id="coupon-list">
+        <div class="loader">쿠폰 목록을 불러오는 중...</div>
+    </div>
+</div>
+
+<script>
+    const uidInput = document.getElementById('uid');
+    const couponListDiv = document.getElementById('coupon-list');
+    const couponCountSpan = document.getElementById('coupon-count');
+    const baseURL = 'https://coupon.netmarble.com/tskgb?playerId=';
+
+    let coupons = [];
+
+    async function initialize() {
+        try {
+            const response = await fetch('/api/coupons');
+            if (!response.ok) throw new Error('서버에서 쿠폰 목록을 가져오는데 실패했습니다.');
+            coupons = await response.json();
+            renderCouponList(coupons);
+        } catch (error) {
+            couponListDiv.innerHTML = `<div class="loader" style="color: #ff5252;">${error.message}</div>`;
+        }
+    }
+    
+    function renderCouponList(coupons) {
+        couponListDiv.innerHTML = ''; 
+        if (coupons.length === 0) {
+            couponListDiv.innerHTML = '<div class="loader">현재 사용 가능한 쿠폰이 없습니다.</div>';
+            return;
+        }
+
+        coupons.forEach(coupon => {
+            const couponItem = document.createElement('div');
+            couponItem.className = 'coupon-item';
+            couponItem.innerHTML = `
+                <div class="coupon-info">${coupon.name}</div>
+                <button class="register-btn" data-code="${coupon.code}" disabled>UID 입력 필요</button>
+            `;
+            couponListDiv.appendChild(couponItem);
+        });
+        couponCountSpan.textContent = `총 ${coupons.length}개`;
+    }
+
+    uidInput.addEventListener('input', function() {
+        const uid = uidInput.value.trim();
+        const allButtons = document.querySelectorAll('.register-btn');
+
+        allButtons.forEach(button => {
+            if (uid) {
+                button.disabled = false;
+                button.textContent = '등록하러 가기';
+            } else {
+                button.disabled = true;
+                button.textContent = 'UID 입력 필요';
+            }
+        });
+    });
+
+    couponListDiv.addEventListener('click', function(event) {
+        if (event.target.classList.contains('register-btn')) {
+            const button = event.target;
+            const couponCode = button.dataset.code;
+            const uid = uidInput.value.trim();
+
+            if (!uid) {
+                alert('UID를 먼저 입력해주세요.');
+                return;
+            }
+
+            const finalURL = `${baseURL}${uid}&code=${couponCode}`;
+            
+            window.open(finalURL, '_blank');
+        }
+    });
+    
+    initialize();
+</script>
+
+</body>
+</html>
