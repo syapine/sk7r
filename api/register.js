@@ -1,5 +1,5 @@
-// 1. 필요한 도구(node-fetch)를 불러옵니다.
-const fetch = require('node-fetch');
+// 1. 필요한 도구(node-fetch)를 신형 방식(import)으로 불러옵니다.
+import fetch from 'node-fetch';
 
 export default async function handler(req, res) {
   // 2. 웹사이트에서 보낸 UID와 쿠폰 코드를 받습니다.
@@ -15,7 +15,6 @@ export default async function handler(req, res) {
 
   try {
     // 3. 넷마블 쿠폰 등록 서버에 대신 요청을 보냅니다.
-    // 주의: 아래 URL은 예시이며 실제 넷마블의 주소와 다를 수 있습니다.
     const netmarbleResponse = await fetch('https://coupon.netmarble.com/api/v1/coupon/use', {
       method: 'POST',
       headers: {
@@ -36,6 +35,7 @@ export default async function handler(req, res) {
 
   } catch (error) {
     // 6. 중간에 문제가 생기면 오류를 반환합니다.
+    console.error('넷마블 서버 통신 중 오류:', error); // 디버깅을 위해 에러 로그 추가
     res.status(500).json({ message: '서버 통신 중 오류 발생', error: error.message });
   }
 }
