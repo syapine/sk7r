@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>쿠폰 자동 등록 시스템</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-slate-100">
+    <div class="container mx-auto max-w-xl p-4 sm:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-slate-900">쿠폰 자동 등록 시스템</h1>
+            <p class="text-slate-600 mt-2">UID를 입력하고 등록할 쿠폰을 선택하세요.</p>
+        </header>
+
+        <!-- Input Section -->
+        <div class="bg-white p-6 rounded-xl shadow-md mb-6">
+            <div class="space-y-4">
+                <div>
+                    <label for="user-id" class="block text-sm font-medium text-slate-700 mb-1">고객 ID (UID)</label>
+                    <input type="text" id="user-id" placeholder="넷마블 UID를 입력하세요" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                <button id="load-coupons-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-all">
+                    등록 가능한 쿠폰 불러오기
+                </button>
+            </div>
+        </div>
+
+        <!-- Coupon List Section -->
+        <div>
+            <h2 class="text-2xl font-semibold mb-4">쿠폰 목록</h2>
+            <div id="coupon-list" class="space-y-3">
+                <!-- Coupons will be dynamically inserted here -->
+            </div>
+            <div id="info-message" class="text-center bg-white p-8 rounded-xl shadow-sm">
+                <p class="text-slate-500">UID를 입력하고 쿠폰을 불러오세요.</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase SDK - Firestore 데이터 조회를 위해 필요합니다.
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- DOM Elements ---
+        const userIdInput = document.getElementById('user-id');
+        const loadCouponsBtn = document.getElementById('load-coupons-btn');
+        const couponList = document.getElementById('coupon-list');
+        const infoMessage = document.getElementById('info-message');
+
+        // --- Configuration ---
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        
+        // =================================================================================
+        // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
+        // 중요! 2단계에서 백엔드 배포 후 얻은 Cloud Function URL을 여기에 붙여넣으세요.
+        const cloudFunctionUrl = 'YOUR_CLOUD_FUNCTION_URL_HERE'; 
+        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+        // =================================================================================
+
+        let db;
+        try {
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+        } catch (e) {
+            console.error("Firebase 초기화 실패", e);
+            infoMessage.textContent = '시스템 초기화에 실패했습니다.';
+        }
+
+        async function loadAndRenderCoupons() {
+            if (!db) {
+                alert('데이터베이스에 연결되지 않았습니다.');
+                return;
+            }
+            infoMessage.textContent = '쿠폰을 불러오는 중...';
+            infoMessage.classList.remove('hidden');
+            couponList.innerHTML = '';
+
+            try {
+                const couponsCollectionPath = `/artifacts/${appId}/public/data/coupons`;
+                const q = query(collection(db, couponsCollectionPath));
+                const querySnapshot = await getDocs(q);
+                const coupons = [];
+                querySnapshot.forEach((doc) => coupons.push({ id: doc.id, ...doc.data() }));
+
+                if (coupons.length === 0) {
+                    infoMessage.textContent = '등록된 쿠폰이 없습니다. 관리자가 쿠폰을 추가해야 합니다.';
+                } else {
+                    infoMessage.classList.add('hidden');
+                    renderCoupons(coupons);
+                }
+            } catch (error) {
+                console.error("쿠폰 로딩 오류: ", error);
+                infoMessage.textContent = '쿠폰을 불러오는 중 오류가 발생했습니다.';
+            }
+        }
+
+        function renderCoupons(coupons) {
+            couponList.innerHTML = '';
+            coupons.forEach(coupon => {
+                const couponEl = document.createElement('div');
+                couponEl.className = 'bg-white p-4 rounded-lg shadow-sm flex items-center justify-between gap-3';
+                couponEl.innerHTML = `
+                    <div class="flex-grow">
+                        <p class="font-semibold text-slate-800">${coupon.desc || '이름 없는 쿠폰'}</p>
+                        <p class="text-sm text-slate-500 font-mono">${coupon.code}</p>
+                    </div>
+                    <button data-code="${coupon.code}" class="register-btn flex-shrink-0 bg-green-600 text-white text-sm font-bold py-2 px-4 rounded-md hover:bg-green-700 transition-all">등록</button>
+                    <div class="status-indicator hidden w-24 text-sm text-center"></div>
+                `;
+                couponList.appendChild(couponEl);
+            });
+        }
+
+        async function registerCoupon(button) {
+            const uid = userIdInput.value.trim();
+            if (!uid) {
+                alert('고객 ID (UID)를 먼저 입력해주세요!');
+                userIdInput.focus();
+                return;
+            }
+            
+            if (cloudFunctionUrl === 'YOUR_CLOUD_FUNCTION_URL_HERE') {
+                alert('오류: Cloud Function URL이 설정되지 않았습니다. 관리자에게 문의하세요.');
+                return;
+            }
+
+            const couponCode = button.dataset.code;
+            const statusEl = button.nextElementSibling;
+
+            // Show loader
+            button.classList.add('hidden');
+            statusEl.classList.remove('hidden', 'text-green-600', 'text-red-600');
+            statusEl.innerHTML = '<div class="loader mx-auto"></div>';
+
+            try {
+                const response = await fetch(cloudFunctionUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ uid: uid, couponCode: couponCode })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    statusEl.textContent = '등록 성공!';
+                    statusEl.className = 'status-indicator w-24 text-sm text-center font-bold text-green-600';
+                } else {
+                    // 실패 시 버튼 다시 보이게 함
+                    button.classList.remove('hidden');
+                    statusEl.classList.add('hidden');
+                    alert(`등록 실패: ${result.message || '알 수 없는 오류'}`);
+                }
+            } catch (error) {
+                console.error('자동 등록 함수 호출 오류:', error);
+                button.classList.remove('hidden');
+                statusEl.classList.add('hidden');
+                alert('자동 등록 중 오류가 발생했습니다. 서버 상태를 확인해주세요.');
+            }
+        }
+
+        loadCouponsBtn.addEventListener('click', loadAndRenderCoupons);
+        couponList.addEventListener('click', (e) => {
+            if (e.target.classList.contains('register-btn')) {
+                registerCoupon(e.target);
+            }
+        });
+    </script>
+</body>
+</html>
