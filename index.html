@@ -6,30 +6,44 @@
     <title>쿠폰 자동 등록 시스템</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
     /* --- 배경 이미지 추가 --- */
     body { 
         font-family: 'Noto Sans KR', sans-serif;
         /* ▼▼▼ 이 부분을 아래와 같이 수정하세요 ▼▼▼ */
-        background-image: url('./images/seven.webp'); /* './'는 현재 폴더를 의미합니다 */
+        background-image: url('./images/seven2.png'); /* './'는 현재 폴더를 의미합니다 */
         background-size: cover;
         background-position: center;
         background-attachment: fixed; /* 스크롤 시 배경은 고정 */
     }
     /* ... (나머지 스타일 코드는 그대로) ... */
-</style>
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body class="bg-slate-100">
     <div class="container mx-auto max-w-xl p-4 sm:p-8">
         <header class="text-center mb-8">
-            <h1 class="text-3xl sm:text-4xl font-bold text-slate-900">쿠폰 자동 등록 시스템</h1>
+            <!-- ▼▼▼ 제목을 수정했습니다 ▼▼▼ -->
+            <h1 class="text-3xl sm:text-4xl font-bold text-slate-900 drop-shadow-lg">쿠폰 자동등록 시스템</h1>
+            <!-- ▼▼▼ 문구 색상을 흰색으로 변경했습니다 ▼▼▼ -->
             <p class="text-white mt-2 font-medium drop-shadow-lg">UID만 입력하면 쿠폰이 바로 등록됩니다.</p>
         </header>
 
-        <!-- Input Section -->
-        <div class="bg-white p-6 rounded-xl shadow-md mb-6">
+        <!-- Input Section: 반투명 배경 및 블러 효과 추가 -->
+        <div class="bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-lg mb-6">
             <div class="space-y-4">
                 <div>
                     <label for="user-id" class="block text-sm font-medium text-slate-700 mb-1">고객 ID (UID)</label>
@@ -43,12 +57,17 @@
 
         <!-- Coupon List Section -->
         <div>
-            <h2 class="text-2xl font-semibold mb-4">쿠폰 목록</h2>
+            <!-- ▼▼▼ 쿠폰 개수를 표시하는 영역을 추가했습니다 ▼▼▼ -->
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl font-semibold text-slate-900 drop-shadow-lg">쿠폰 목록</h2>
+                <span id="coupon-count" class="text-lg font-medium text-white drop-shadow-lg"></span>
+            </div>
             <div id="coupon-list" class="space-y-3">
                 <!-- Coupons will be dynamically inserted here -->
             </div>
-            <div id="info-message" class="text-center bg-white p-8 rounded-xl shadow-sm">
-                <p class="text-slate-500">UID를 입력하고 쿠폰을 불러오세요.</p>
+            <!-- Info Message Box: 반투명 배경 및 블러 효과 추가 -->
+            <div id="info-message" class="bg-white/80 backdrop-blur-sm text-center p-8 rounded-xl shadow-lg">
+                <p class="text-slate-500">UID를 입력하고 쿠폰을 등록하세요.</p>
             </div>
         </div>
     </div>
@@ -63,6 +82,7 @@
         const loadCouponsBtn = document.getElementById('load-coupons-btn');
         const couponList = document.getElementById('coupon-list');
         const infoMessage = document.getElementById('info-message');
+        const couponCount = document.getElementById('coupon-count'); // 쿠폰 개수 element 추가
 
         // --- Configuration ---
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
@@ -92,6 +112,7 @@
             infoMessage.textContent = '쿠폰을 불러오는 중...';
             infoMessage.classList.remove('hidden');
             couponList.innerHTML = '';
+            couponCount.textContent = ''; // 이전 개수 초기화
 
             try {
                 const couponsCollectionPath = `/artifacts/${appId}/public/data/coupons`;
@@ -99,6 +120,9 @@
                 const querySnapshot = await getDocs(q);
                 const coupons = [];
                 querySnapshot.forEach((doc) => coupons.push({ id: doc.id, ...doc.data() }));
+
+                // ▼▼▼ 쿠폰 개수를 업데이트하는 로직을 추가했습니다 ▼▼▼
+                couponCount.textContent = `총 ${coupons.length}개`;
 
                 if (coupons.length === 0) {
                     infoMessage.textContent = '등록된 쿠폰이 없습니다. 관리자가 쿠폰을 추가해야 합니다.';
@@ -116,7 +140,8 @@
             couponList.innerHTML = '';
             coupons.forEach(coupon => {
                 const couponEl = document.createElement('div');
-                couponEl.className = 'bg-white p-4 rounded-lg shadow-sm flex items-center justify-between gap-3';
+                // Coupon Item: 반투명 배경 및 블러 효과 추가
+                couponEl.className = 'bg-white/80 backdrop-blur-sm p-4 rounded-lg shadow-lg flex items-center justify-between gap-3';
                 couponEl.innerHTML = `
                     <div class="flex-grow">
                         <p class="font-semibold text-slate-800">${coupon.desc || '이름 없는 쿠폰'}</p>
