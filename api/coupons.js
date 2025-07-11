@@ -1,6 +1,6 @@
 import admin from 'firebase-admin';
 
-// Firebase Admin SDK 초기화 (기존과 동일)
+// Firebase Admin SDK 초기화
 try {
   const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
   if (admin.apps.length === 0) {
@@ -14,20 +14,32 @@ try {
 
 const db = admin.firestore();
 
-// 이 함수는 데이터베이스의 모든 최상위 컬렉션 목록을 가져옵니다.
 export default async function handler(req, res) {
   try {
-    console.log("최상위 컬렉션 목록을 가져옵니다...");
+    // ## 바로 이 경로가 수정된 부분입니다. ##
+    const couponsRef = db.collection('artifacts').doc('appid').collection('public').doc('data').collection('coupons');
     
-    const collections = await db.listCollections();
-    const collectionIds = collections.map(col => col.id);
+    const snapshot = await couponsRef.get();
 
-    console.log("찾은 최상위 컬렉션:", collectionIds);
+    if (snapshot.empty) {
+      return res.status(200).json([]);
+    }
 
-    res.status(200).json({ root_collections: collectionIds });
+    const couponList = [];
+    snapshot.forEach(doc => {
+      const couponData = doc.data();
+      if (couponData && couponData.code) {
+        couponList.push({
+          name: couponData.code,
+          code: couponData.code
+        });
+      }
+    });
+
+    res.status(200).json(couponList);
 
   } catch (error) {
-    console.error('컬렉션 목록을 가져오는 중 오류 발생:', error);
-    res.status(500).json({ message: '컬렉션 목록을 가져오는 데 실패했습니다.', error: error.message });
+    console.error('Firestore에서 데이터를 가져오는 중 오류 발생:', error);
+    res.status(500).json({ message: '서버에서 쿠폰 목록을 가져오는 데 실패했습니다.' });
   }
 }
