@@ -118,4 +118,30 @@
         <h2>사용 가능한 쿠폰 목록</h2>
         <span id="coupon-count"></span>
     </div>
-    <div id="coupon
+    <div id="coupon-list">
+        <div class="loader">쿠폰 목록을 불러오는 중...</div>
+    </div>
+</div>
+
+<script>
+    const uidInput = document.getElementById('uid');
+    const couponListDiv = document.getElementById('coupon-list');
+    const couponCountSpan = document.getElementById('coupon-count');
+    // ## 이 부분의 변수명을 playerId로 수정했습니다. ##
+    const baseURL = 'https://coupon.netmarble.com/tskgb?playerId=';
+
+    let coupons = [];
+
+    async function initialize() {
+        try {
+            const response = await fetch('/api/coupons');
+            if (!response.ok) throw new Error('서버에서 쿠폰 목록을 가져오는데 실패했습니다.');
+            coupons = await response.json();
+            renderCouponList(coupons);
+        } catch (error) {
+            couponListDiv.innerHTML = `<div class="loader" style="color: #ff5252;">${error.message}</div>`;
+        }
+    }
+    
+    function renderCouponList(coupons) {
+        couponListDiv.innerHTML = '';
