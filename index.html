@@ -38,37 +38,41 @@
         <header class="text-center mb-8">
             <!-- ▼▼▼ 제목을 수정했습니다 ▼▼▼ -->
             <h1 class="text-3xl sm:text-4xl font-bold text-slate-900 drop-shadow-lg">쿠폰 자동등록 시스템</h1>
-            <!-- ▼▼▼ 문구 색상을 흰색으로 변경했습니다 ▼▼▼ -->
+            <!-- ▼▼▼ 문구 색상을 검은색으로 변경했습니다 ▼▼▼ -->
             <p class="text-slate-900 mt-2 font-medium drop-shadow-lg">UID만 입력하면 쿠폰이 바로 등록됩니다.</p>
         </header>
 
-        <!-- Input Section: 반투명 배경 및 블러 효과 추가 -->
-        <div class="bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-lg mb-6">
-            <div class="space-y-4">
-                <div>
-                    <label for="user-id" class="block text-sm font-medium text-slate-700 mb-1">고객 ID (UID)</label>
-                    <input type="text" id="user-id" placeholder="세븐나이츠 리버스 UID를 입력하세요" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+        <!-- ▼▼▼ 메인 컨텐츠를 감싸는 div 추가 ▼▼▼ -->
+        <div id="main-content">
+            <!-- Input Section: 반투명 배경 및 블러 효과 추가 -->
+            <div class="bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-lg mb-6">
+                <div class="space-y-4">
+                    <div>
+                        <label for="user-id" class="block text-sm font-medium text-slate-700 mb-1">고객 ID (UID)</label>
+                        <input type="text" id="user-id" placeholder="넷마블 UID를 입력하세요" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <button id="load-coupons-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-all">
+                        등록 가능한 쿠폰 불러오기
+                    </button>
                 </div>
-                <button id="load-coupons-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-all">
-                    등록 가능한 쿠폰 불러오기
-                </button>
+            </div>
+
+            <!-- Coupon List Section -->
+            <div>
+                <!-- ▼▼▼ 쿠폰 개수를 표시하는 영역을 추가했습니다 ▼▼▼ -->
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-2xl font-semibold text-slate-900 drop-shadow-lg">쿠폰 목록</h2>
+                    <span id="coupon-count" class="text-lg font-medium text-white drop-shadow-lg"></span>
+                </div>
+                <div id="coupon-list" class="space-y-3">
+                    <!-- Coupons will be dynamically inserted here -->
+                </div>
             </div>
         </div>
-
-        <!-- Coupon List Section -->
-        <div>
-            <!-- ▼▼▼ 쿠폰 개수를 표시하는 영역을 추가했습니다 ▼▼▼ -->
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-2xl font-semibold text-slate-900 drop-shadow-lg">쿠폰 목록</h2>
-                <span id="coupon-count" class="text-lg font-medium text-white drop-shadow-lg"></span>
-            </div>
-            <div id="coupon-list" class="space-y-3">
-                <!-- Coupons will be dynamically inserted here -->
-            </div>
-            <!-- Info Message Box: 반투명 배경 및 블러 효과 추가 -->
-            <div id="info-message" class="bg-white/80 backdrop-blur-sm text-center p-8 rounded-xl shadow-lg">
-                <p class="text-slate-500">UID를 입력하고 쿠폰을 등록하세요.</p>
-            </div>
+        
+        <!-- ▼▼▼ 오류 메시지 및 초기 안내 메시지 표시 영역 (기본적으로 숨김) ▼▼▼ -->
+        <div id="info-message" class="hidden bg-white/80 backdrop-blur-sm text-center p-8 rounded-xl shadow-lg">
+            <p class="text-slate-500"></p>
         </div>
     </div>
 
@@ -81,36 +85,67 @@
         const userIdInput = document.getElementById('user-id');
         const loadCouponsBtn = document.getElementById('load-coupons-btn');
         const couponList = document.getElementById('coupon-list');
-        const infoMessage = document.getElementById('info-message');
-        const couponCount = document.getElementById('coupon-count'); // 쿠폰 개수 element 추가
+        const infoMessageContainer = document.getElementById('info-message');
+        const infoMessageText = infoMessageContainer.querySelector('p');
+        const couponCount = document.getElementById('coupon-count');
+        const mainContent = document.getElementById('main-content');
 
         // --- Configuration ---
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        // ▼▼▼ 여기에 Firebase 콘솔에서 복사한 firebaseConfig 객체만 정확히 붙여넣어야 합니다. ▼▼▼
+        const firebaseConfig = {
+            apiKey: "AIzaSyB6vd4gda-k10ZyAqzkQn_iPccYe8d9DKk",
+            authDomain: "sk7re-9eefb.firebaseapp.com",
+            projectId: "sk7re-9eefb",
+            storageBucket: "sk7re-9eefb.appspot.com",
+            messagingSenderId: "688256773743",
+            appId: "1:688256773743:web:bdb2dc99b91733e72ee79a",
+            measurementId: "G-209Q0P7X65"
+        };
+
+        // 🚨 중요! 위 firebaseConfig 객체의 projectId 값을 아래 appId 변수에 한 번 더 입력해주세요. 🚨
+        // ▼▼▼ 따옴표가 누락되어 있던 부분을 수정했습니다. ▼▼▼
+        const appId = "sk7re-9eefb" || 'default-app-id';
         
         // =================================================================================
         // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
         // 중요! 2단계에서 백엔드 배포 후 얻은 Cloud Function URL을 여기에 붙여넣으세요.
-        const cloudFunctionUrl = 'YOUR_CLOUD_FUNCTION_URL_HERE'; 
+        const cloudFunctionUrl = 'https://sk7r.vercel.app'; 
         // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
         // =================================================================================
 
         let db;
-        try {
-            const app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-        } catch (e) {
-            console.error("Firebase 초기화 실패", e);
-            infoMessage.textContent = '시스템 초기화에 실패했습니다.';
+
+        // ▼▼▼ Firebase 설정 정보가 비어있는지 확인하는 로직을 강화했습니다. ▼▼▼
+        if (!firebaseConfig.apiKey) {
+            const errorMessage = "시스템 설정 오류! 이 웹사이트의 소스 코드(index.html)를 열고 'firebaseConfig' 변수를 당신의 Firebase 프로젝트 정보로 채워주세요. 이 정보는 Firebase 콘솔의 '프로젝트 설정'에서 찾을 수 있습니다.";
+            console.error(errorMessage);
+            mainContent.style.display = 'none'; // 메인 컨텐츠 숨기기
+            infoMessageContainer.classList.remove('hidden');
+            infoMessageContainer.classList.add('bg-red-100', 'border-l-4', 'border-red-500', 'text-red-700'); // 오류 스타일 적용
+            infoMessageText.textContent = errorMessage;
+        } else {
+             try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                infoMessageContainer.classList.remove('hidden');
+                infoMessageText.textContent = 'UID를 입력하고 쿠폰을 등록하세요.';
+             } catch (e) {
+                console.error("Firebase 초기화 실패", e);
+                mainContent.style.display = 'none';
+                infoMessageContainer.classList.remove('hidden');
+                infoMessageContainer.classList.add('bg-red-100', 'border-l-4', 'border-red-500', 'text-red-700');
+                infoMessageText.textContent = '시스템 초기화에 실패했습니다. Firebase 설정 정보를 다시 확인해주세요.';
+            }
         }
 
         async function loadAndRenderCoupons() {
             if (!db) {
-                alert('데이터베이스에 연결되지 않았습니다.');
+                alert('데이터베이스에 연결되지 않았습니다. Firebase 설정을 확인해주세요.');
                 return;
             }
-            infoMessage.textContent = '쿠폰을 불러오는 중...';
-            infoMessage.classList.remove('hidden');
+            
+            infoMessageText.textContent = '쿠폰을 불러오는 중...';
+            infoMessageContainer.classList.remove('hidden');
             couponList.innerHTML = '';
             couponCount.textContent = ''; // 이전 개수 초기화
 
@@ -121,18 +156,19 @@
                 const coupons = [];
                 querySnapshot.forEach((doc) => coupons.push({ id: doc.id, ...doc.data() }));
 
-                // ▼▼▼ 쿠폰 개수를 업데이트하는 로직을 추가했습니다 ▼▼▼
                 couponCount.textContent = `총 ${coupons.length}개`;
 
                 if (coupons.length === 0) {
-                    infoMessage.textContent = '등록된 쿠폰이 없습니다. 관리자가 쿠폰을 추가해야 합니다.';
+                    infoMessageContainer.classList.remove('hidden');
+                    infoMessageText.textContent = '등록된 쿠폰이 없습니다. 관리자가 쿠폰을 추가해야 합니다.';
                 } else {
-                    infoMessage.classList.add('hidden');
+                    infoMessageContainer.classList.add('hidden');
                     renderCoupons(coupons);
                 }
             } catch (error) {
                 console.error("쿠폰 로딩 오류: ", error);
-                infoMessage.textContent = '쿠폰을 불러오는 중 오류가 발생했습니다.';
+                infoMessageText.textContent = '쿠폰을 불러오는 중 오류가 발생했습니다.';
+                infoMessageContainer.classList.remove('hidden');
             }
         }
 
@@ -140,7 +176,6 @@
             couponList.innerHTML = '';
             coupons.forEach(coupon => {
                 const couponEl = document.createElement('div');
-                // Coupon Item: 반투명 배경 및 블러 효과 추가
                 couponEl.className = 'bg-white/80 backdrop-blur-sm p-4 rounded-lg shadow-lg flex items-center justify-between gap-3';
                 couponEl.innerHTML = `
                     <div class="flex-grow">
@@ -170,7 +205,6 @@
             const couponCode = button.dataset.code;
             const statusEl = button.nextElementSibling;
 
-            // Show loader
             button.classList.add('hidden');
             statusEl.classList.remove('hidden', 'text-green-600', 'text-red-600');
             statusEl.innerHTML = '<div class="loader mx-auto"></div>';
@@ -188,7 +222,6 @@
                     statusEl.textContent = '등록 성공!';
                     statusEl.className = 'status-indicator w-24 text-sm text-center font-bold text-green-600';
                 } else {
-                    // 실패 시 버튼 다시 보이게 함
                     button.classList.remove('hidden');
                     statusEl.classList.add('hidden');
                     alert(`등록 실패: ${result.message || '알 수 없는 오류'}`);
@@ -210,3 +243,6 @@
     </script>
 </body>
 </html>
+```
+
+I made some changes. `appId` 변수에 문자열을 할당할 때 따옴표가 누락되어 발생한 `SyntaxError` 오류를 수정했습
