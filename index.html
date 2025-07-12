@@ -189,51 +189,52 @@
     }
 
     // 2. 쿠폰 목록을 화면에 그리는 함수
-    function renderCouponList() {
-        couponListDiv.innerHTML = ''; 
-        if (coupons.length === 0) {
-            couponListDiv.innerHTML = '<div class="loader">현재 사용 가능한 쿠폰이 없습니다.</div>';
-            return;
-        }
-
-        const uid = uidInput.value.trim();
-
-        coupons.forEach(coupon => {
-            const couponItem = document.createElement('div');
-            couponItem.className = 'coupon-item';
-
-            const couponInfo = document.createElement('div');
-            couponInfo.className = 'coupon-info';
-            couponInfo.textContent = coupon.name;
-
-            const button = document.createElement('button');
-            button.className = 'register-btn';
-            button.dataset.code = coupon.code;
-            
-            const key = `usedCoupon_${uid}_${coupon.code}`;
-            const isUsed = uid ? localStorage.getItem(key) : false;
-
-            if (isUsed) {
-                button.classList.add('used');
-                button.textContent = '등록완료';
-                button.disabled = false;
-            } else {
-                if (uid) {
-                    button.disabled = false;
-                    button.textContent = '등록하러 가기';
-                } else {
-                    button.disabled = true;
-                    button.textContent = 'UID 입력 필요';
-                }
-            }
-            
-            couponItem.appendChild(couponInfo);
-            couponItem.appendChild(button);
-            couponListDiv.appendChild(couponItem);
-        });
-        couponCountSpan.textContent = `총 ${coupons.length}개`;
+function renderCouponList() {
+    couponListDiv.innerHTML = '';
+    if (coupons.length === 0) {
+        couponListDiv.innerHTML = '<div class="loader">현재 사용 가능한 쿠폰이 없습니다.</div>';
+        return;
     }
 
+    const uid = uidInput.value.trim();
+
+    coupons.forEach(coupon => {
+        const couponItem = document.createElement('div');
+        couponItem.className = 'coupon-item';
+
+        const couponInfo = document.createElement('div');
+        couponInfo.className = 'coupon-info';
+
+        // [수정] "번호. 쿠폰코드" 형식으로 텍스트를 표시합니다.
+        couponInfo.textContent = `${coupon.id}. ${coupon.code}`;
+
+        const button = document.createElement('button');
+        button.className = 'register-btn';
+        button.dataset.code = coupon.code;
+        
+        const key = `usedCoupon_${uid}_${coupon.code}`;
+        const isUsed = uid ? localStorage.getItem(key) : false;
+
+        if (isUsed) {
+            button.classList.add('used');
+            button.textContent = '등록완료';
+            button.disabled = false;
+        } else {
+            if (uid) {
+                button.disabled = false;
+                button.textContent = '등록하러 가기';
+            } else {
+                button.disabled = true;
+                button.textContent = 'UID 입력 필요';
+            }
+        }
+        
+        couponItem.appendChild(couponInfo);
+        couponItem.appendChild(button);
+        couponListDiv.appendChild(couponItem);
+    });
+    couponCountSpan.textContent = `총 ${coupons.length}개`;
+}
     // 3. UID 입력에 실시간으로 반응하는 함수
     uidInput.addEventListener('input', function() {
         renderCouponList();
