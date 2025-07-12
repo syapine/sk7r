@@ -4,104 +4,122 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>세나 리버스 쿠폰 자동 입력기</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
-        body {
-            font-family: 'Noto Sans KR', sans-serif;
-            background-color: #1a1a2e;
-            color: #e0e0e0;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            box-sizing: border-box;
-        }
-        .container {
-            width: 100%;
-            max-width: 500px;
-            background-color: #162447;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-            border: 1px solid #1f4068;
-        }
-        h1 {
-            color: #13E2DA;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-        p {
-            text-align: center;
-            margin-bottom: 30px;
-            color: #b3c5ef;
-        }
-        .input-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 700;
-        }
-        input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            background-color: #1a1a2e;
-            border: 1px solid #1f4068;
-            border-radius: 8px;
-            color: #e0e0e0;
-            font-size: 16px;
-            box-sizing: border-box;
-        }
-        .coupon-list-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid #1f4068;
-            padding-bottom: 10px;
-            margin-top: 20px;
-        }
-        .coupon-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            background-color: #1a1a2e;
-            border-radius: 8px;
-            margin-top: 10px;
-        }
-        .coupon-info {
-            font-weight: 700;
-        }
-        .register-btn {
-            padding: 8px 12px;
-            background: linear-gradient(90deg, #13E2DA, #1E90FF);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .register-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(25, 220, 210, 0.25);
-        }
-        .register-btn:disabled {
-             background: #555;
-             cursor: not-allowed;
-             opacity: 0.6;
-        }
-        .loader {
-            text-align: center;
-            padding: 20px;
-            color: #b3c5ef;
-            font-size: 18px;
-        }
-    </style>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
+    body {
+        font-family: 'Noto Sans KR', sans-serif;
+        background: linear-gradient(135deg, #0e0e1a, #0a0a14); /* 더 깊고 어두운 그라데이션 */
+        color: #e0e0e0;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        box-sizing: border-box;
+        overflow-x: hidden;
+    }
+    .container {
+        width: 100%;
+        max-width: 500px;
+        background: rgba(22, 36, 71, 0.5); /* 반투명 배경 */
+        backdrop-filter: blur(10px); /* 배경 흐림 효과 */
+        border-radius: 20px;
+        padding: 35px;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+        border: 1px solid rgba(31, 64, 104, 0.4);
+    }
+    h1 {
+        color: #63d4ff; /* 좀 더 부드러운 청록색 */
+        text-align: center;
+        margin-bottom: 5px;
+        font-weight: 700;
+        letter-spacing: -1px;
+    }
+    p {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #a0aec0; /* 회색 톤 조정 */
+    }
+    .input-group {
+        margin-bottom: 25px;
+    }
+    label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: 700;
+    }
+    input[type="text"] {
+        width: 100%;
+        padding: 15px;
+        background-color: rgba(26, 26, 46, 0.7);
+        border: 1px solid rgba(31, 64, 104, 0.6);
+        border-radius: 10px;
+        color: #e0e0e0;
+        font-size: 16px;
+        box-sizing: border-box;
+        transition: border-color 0.3s ease;
+    }
+    input[type="text"]:focus {
+        outline: none;
+        border-color: #63d4ff;
+    }
+    .coupon-list-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(31, 64, 104, 0.8);
+        padding-bottom: 15px;
+        margin-top: 30px;
+    }
+    .coupon-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 18px;
+        background-color: rgba(26, 26, 46, 0.7);
+        border-radius: 10px;
+        margin-top: 15px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .coupon-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(99, 212, 255, 0.1);
+    }
+    .coupon-info {
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+    .register-btn {
+        padding: 10px 18px;
+        background: linear-gradient(45deg, #13E2DA, #1E90FF);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+    .register-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 15px rgba(25, 220, 210, 0.4);
+    }
+    .register-btn:disabled {
+        background: #555;
+        cursor: not-allowed;
+        opacity: 0.6;
+        transform: none;
+        box-shadow: none;
+    }
+    .loader {
+        text-align: center;
+        padding: 30px;
+        color: #b3c5ef;
+        font-size: 18px;
+    }
+</style>
 </head>
 <body>
 
