@@ -16,7 +16,7 @@ const db = admin.firestore();
 
 export default async function handler(req, res) {
   // CORS 허용 헤더 설정
-  res.setHeader('Access-Control-Allow-Origin', 'https://ryapne.github.io');
+  res.setHeader('Access-Control-Allow-Origin', 'https://syapine.github.io');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
