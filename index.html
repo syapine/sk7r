@@ -249,7 +249,7 @@ couponListDiv.addEventListener('click', function(event) {
         button.classList.add('used');
         button.textContent = '등록 시도됨';
 
-        const finalURL = `${baseURL}${uid}&couponId=${couponCode}`;
+ 	const finalURL = `${baseURL}${uid}&code=${couponCode}`;
         window.open(finalURL, '_blank');
     }
 });
