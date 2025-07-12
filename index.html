@@ -9,12 +9,15 @@
     
     body {
         font-family: 'Noto Sans KR', sans-serif;
-        background-image: url('images/seven2.jpg'); 
+        /* --- 배경 이미지 변경 --- */
+        background-image: url('images/seven2.png'); 
         background-size: cover;
         background-position: center;
         background-attachment: fixed;
+        /* --- 배경 위에 어두운 필터 추가 --- */
         background-color: rgba(0, 0, 0, 0.6);
         background-blend-mode: multiply;
+
         color: #e0e0e0;
         margin: 0;
         padding: 20px;
@@ -28,7 +31,7 @@
     .container {
         width: 100%;
         max-width: 500px;
-        background: rgba(22, 36, 71, 0.6);
+        background: rgba(22, 36, 71, 0.6); /* 배경이 잘 보이도록 투명도 조정 */
         backdrop-filter: blur(10px);
         border-radius: 20px;
         padding: 35px;
@@ -55,22 +58,27 @@
         margin-bottom: 10px;
         font-weight: 700;
     }
+
+    /* --- 입력창 스타일 개선 --- */
     input[type="text"] {
         width: 100%;
         padding: 15px;
-        background-color: rgba(10, 20, 40, 0.75);
+        background-color: rgba(10, 20, 40, 0.75); /* 더 어둡고 투명하게 */
         border: 1px solid rgba(31, 64, 104, 0.6);
         border-radius: 10px;
         color: #e0e0e0;
         font-size: 16px;
         box-sizing: border-box;
+        /* 부드러운 전환 효과 추가 */
         transition: border-color 0.3s ease, box-shadow 0.3s ease;
     }
+    /* 입력창 포커스 시 효과 */
     input[type="text"]:focus {
         outline: none;
         border-color: #63d4ff;
-        box-shadow: 0 0 15px rgba(99, 212, 255, 0.3);
+        box-shadow: 0 0 15px rgba(99, 212, 255, 0.3); /* 은은한 네온 효과 */
     }
+
     .coupon-list-header {
         display: flex;
         justify-content: space-between;
@@ -108,7 +116,6 @@
         cursor: pointer;
         transition: all 0.3s ease;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-        white-space: nowrap; /* 버튼 텍스트가 줄바꿈되지 않도록 추가 */
     }
     .register-btn:hover {
         transform: scale(1.05);
@@ -121,21 +128,22 @@
         transform: none;
         box-shadow: none;
     }
-    .register-btn.used {
-        background: #4a5568;
-        color: #a0aec0;
-        cursor: default;
-    }
-    .register-btn.used:hover {
-        transform: none;
-        box-shadow: none;
-    }
     .loader {
         text-align: center;
         padding: 30px;
         color: #b3c5ef;
         font-size: 18px;
     }
+/* --- [추가] 클릭한 버튼 스타일 --- */
+.register-btn.used {
+    background: #4a5568;
+    color: #a0aec0;
+    cursor: default;
+}
+.register-btn.used:hover {
+    transform: none;
+    box-shadow: none;
+}
 </style>
 </head>
 <body>
@@ -166,93 +174,87 @@
 
     let coupons = [];
 
-    async function initialize() {
-        try {
-            const mockCoupons = [
-                { name: '사전등록 보상 쿠폰', code: 'PRESKGB0315' },
-                { name: '론칭 기념 쿠폰', code: 'LAUNCHSKG77' },
-                { name: 'CM 루디의 선물', code: 'CMKGBLOVE' },
-                { name: '개발자 노트 감사 쿠폰', code: 'DEVNOTEGIFT' },
-                { name: '업데이트 기념 쿠폰', code: 'UPDATE777' }
-            ];
-            coupons = mockCoupons;
-            renderCouponList(); // 쿠폰 목록 표시 함수 호출
-        } catch (error) {
-            couponListDiv.innerHTML = `<div class="loader" style="color: #ff5252;">${error.message}</div>`;
-        }
+async function initialize() {
+    try {
+        // 이 부분은 테스트를 위해 그대로 두었습니다.
+        const mockCoupons = [
+            { name: '사전등록 보상 쿠폰', code: 'PRESKGB0315' },
+            { name: '론칭 기념 쿠폰', code: 'LAUNCHSKG77' },
+            { name: 'CM 루디의 선물', code: 'CMKGBLOVE' },
+            { name: '개발자 노트 감사 쿠폰', code: 'DEVNOTEGIFT' },
+            { name: '업데이트 기념 쿠폰', code: 'UPDATE777' }
+        ];
+        coupons = mockCoupons;
+        renderCouponList(); // 쿠폰 목록 표시 함수 호출
+    } catch (error) {
+        couponListDiv.innerHTML = `<div class="loader" style="color: #ff5252;">${error.message}</div>`;
     }
-    
-    // --- [오류 수정] 쿠폰 목록을 생성하는 방식을 더 안정적으로 변경 ---
-    function renderCouponList() {
-        couponListDiv.innerHTML = ''; 
-        if (coupons.length === 0) {
-            couponListDiv.innerHTML = '<div class="loader">현재 사용 가능한 쿠폰이 없습니다.</div>';
+}
+
+// --- [교체] 쿠폰 목록을 생성하는 방식을 더 안정적으로 변경 ---
+function renderCouponList() {
+    couponListDiv.innerHTML = '';
+    if (coupons.length === 0) {
+        couponListDiv.innerHTML = '<div class="loader">현재 사용 가능한 쿠폰이 없습니다.</div>';
+        return;
+    }
+
+    const uidIsPresent = uidInput.value.trim() !== '';
+
+    coupons.forEach(coupon => {
+        const isUsed = localStorage.getItem('usedCoupon_' + coupon.code);
+        let buttonHTML = '';
+
+        if (isUsed) {
+            // 사용된 쿠폰일 경우
+            buttonHTML = `<button class="register-btn used" data-code="${coupon.code}">등록 시도됨</button>`;
+        } else {
+            // 사용되지 않은 쿠폰일 경우
+            if (uidIsPresent) {
+                buttonHTML = `<button class="register-btn" data-code="${coupon.code}">등록하러 가기</button>`;
+            } else {
+                buttonHTML = `<button class="register-btn" data-code="${coupon.code}" disabled>UID 입력 필요</button>`;
+            }
+        }
+        
+        // 이 부분이 레이아웃을 유지하는 핵심입니다.
+        const couponItemHTML = `
+            <div class="coupon-item">
+                <div class="coupon-info">${coupon.name}</div>
+                ${buttonHTML}
+            </div>
+        `;
+        couponListDiv.innerHTML += couponItemHTML;
+    });
+    couponCountSpan.textContent = `총 ${coupons.length}개`;
+}
+
+uidInput.addEventListener('input', function() {
+    // UID 입력 시마다 쿠폰 목록을 다시 그려서 버튼 상태를 업데이트합니다.
+    renderCouponList();
+});
+
+couponListDiv.addEventListener('click', function(event) {
+    const button = event.target;
+    // 클릭된 것이 'used' 클래스가 없는 'register-btn'일 때만 실행
+    if (button.classList.contains('register-btn') && !button.classList.contains('used')) {
+        const couponCode = button.dataset.code;
+        const uid = uidInput.value.trim();
+
+        if (!uid) {
+            alert('UID를 먼저 입력해주세요.');
             return;
         }
 
-        const uidIsPresent = uidInput.value.trim() !== '';
+        // 로컬 스토리지에 저장하고 스타일 즉시 변경
+        localStorage.setItem('usedCoupon_' + couponCode, 'true');
+        button.classList.add('used');
+        button.textContent = '등록 시도됨';
 
-        coupons.forEach(coupon => {
-            const couponItem = document.createElement('div');
-            couponItem.className = 'coupon-item';
-
-            const couponInfo = document.createElement('div');
-            couponInfo.className = 'coupon-info';
-            couponInfo.textContent = coupon.name;
-
-            const button = document.createElement('button');
-            button.className = 'register-btn';
-            button.dataset.code = coupon.code;
-
-            const isUsed = localStorage.getItem('usedCoupon_' + coupon.code);
-
-            if (isUsed) {
-                button.classList.add('used');
-                button.textContent = '등록 시도됨';
-                button.disabled = false;
-            } else {
-                if (uidIsPresent) {
-                    button.disabled = false;
-                    button.textContent = '등록하러 가기';
-                } else {
-                    button.disabled = true;
-                    button.textContent = 'UID 입력 필요';
-                }
-            }
-            
-            couponItem.appendChild(couponInfo);
-            couponItem.appendChild(button);
-            couponListDiv.appendChild(couponItem);
-        });
-        couponCountSpan.textContent = `총 ${coupons.length}개`;
+        const finalURL = `${baseURL}${uid}&couponId=${couponCode}`;
+        window.open(finalURL, '_blank');
     }
-
-    uidInput.addEventListener('input', function() {
-        // UID 입력 시마다 쿠폰 목록을 다시 그려서 버튼 상태를 업데이트합니다.
-        renderCouponList();
-    });
-
-    couponListDiv.addEventListener('click', function(event) {
-        const button = event.target;
-        // 클릭된 것이 'used' 클래스가 없는 'register-btn'일 때만 실행
-        if (button.classList.contains('register-btn') && !button.classList.contains('used')) {
-            const couponCode = button.dataset.code;
-            const uid = uidInput.value.trim();
-
-            if (!uid) {
-                alert('UID를 먼저 입력해주세요.');
-                return;
-            }
-
-            // 로컬 스토리지에 저장하고 스타일 즉시 변경
-            localStorage.setItem('usedCoupon_' + couponCode, 'true');
-            button.classList.add('used');
-            button.textContent = '등록 시도됨';
-
-            const finalURL = `${baseURL}${uid}&couponId=${couponCode}`;
-            window.open(finalURL, '_blank');
-        }
-    });
+});
     
     initialize();
 </script>
