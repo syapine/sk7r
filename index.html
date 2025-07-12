@@ -176,17 +176,15 @@
 
 async function initialize() {
     try {
-        // 이 부분은 테스트를 위해 그대로 두었습니다.
-        const mockCoupons = [
-            { name: '사전등록 보상 쿠폰', code: 'PRESKGB0315' },
-            { name: '론칭 기념 쿠폰', code: 'LAUNCHSKG77' },
-            { name: 'CM 루디의 선물', code: 'CMKGBLOVE' },
-            { name: '개발자 노트 감사 쿠폰', code: 'DEVNOTEGIFT' },
-            { name: '업데이트 기념 쿠폰', code: 'UPDATE777' }
-        ];
-        coupons = mockCoupons;
-        renderCouponList(); // 쿠폰 목록 표시 함수 호출
+        // 서버에서 실제 쿠폰 목록을 불러옵니다.
+        const response = await fetch('/api/coupons');
+        if (!response.ok) {
+            throw new Error('서버에서 쿠폰 목록을 가져오는데 실패했습니다.');
+        }
+        coupons = await response.json();
+        renderCouponList();
     } catch (error) {
+        console.error(error); // 어떤 오류인지 자세히 보려면 console.error가 유용합니다.
         couponListDiv.innerHTML = `<div class="loader" style="color: #ff5252;">${error.message}</div>`;
     }
 }
