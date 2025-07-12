@@ -171,98 +171,99 @@
     const couponListDiv = document.getElementById('coupon-list');
     const couponCountSpan = document.getElementById('coupon-count');
     const baseURL = 'https://coupon.netmarble.com/tskgb?playerId=';
-
     let coupons = [];
 
-async function initialize() {
-    try {
-        // 서버에서 실제 쿠폰 목록을 불러옵니다.
-        const response = await fetch('https://sk7r.vercel.app/api/coupons');
-        if (!response.ok) {
-            throw new Error('서버에서 쿠폰 목록을 가져오는데 실패했습니다.');
-        }
-        coupons = await response.json();
-        renderCouponList();
-    } catch (error) {
-        console.error(error); // 어떤 오류인지 자세히 보려면 console.error가 유용합니다.
-        couponListDiv.innerHTML = `<div class="loader" style="color: #ff5252;">${error.message}</div>`;
-    }
-}
-
-// --- [교체] 쿠폰 목록을 생성하는 방식을 더 안정적으로 변경 ---
-function renderCouponList() {
-    couponListDiv.innerHTML = ''; 
-    if (coupons.length === 0) {
-        couponListDiv.innerHTML = '<div class="loader">현재 사용 가능한 쿠폰이 없습니다.</div>';
-        return;
-    }
-
-    // [수정] 현재 입력된 UID를 가져옵니다.
-    const uid = uidInput.value.trim();
-
-    coupons.forEach(coupon => {
-        const couponItem = document.createElement('div');
-        couponItem.className = 'coupon-item';
-
-        const couponInfo = document.createElement('div');
-        couponInfo.className = 'coupon-info';
-        couponInfo.textContent = coupon.name;
-
-        const button = document.createElement('button');
-        button.className = 'register-btn';
-        button.dataset.code = coupon.code;
-        
-        // [수정] UID와 쿠폰 코드를 조합한 고유 키를 만듭니다.
-        const key = `usedCoupon_${uid}_${coupon.code}`;
-        const isUsed = uid ? localStorage.getItem(key) : false; // UID가 있을 때만 확인
-
-        if (isUsed) {
-            button.classList.add('used');
-            button.textContent = '등록 시도됨';
-            button.disabled = false;
-        } else {
-            if (uid) {
-                button.disabled = false;
-                button.textContent = '등록하러 가기';
-            } else {
-                button.disabled = true;
-                button.textContent = 'UID 입력 필요';
+    // 1. 서버에서 쿠폰 목록을 불러오는 함수
+    async function initialize() {
+        try {
+            const response = await fetch('https://sk7r.vercel.app/api/coupons');
+            if (!response.ok) {
+                throw new Error('Failed to fetch');
             }
+            coupons = await response.json();
+            renderCouponList();
+        } catch (error) {
+            console.error(error);
+            couponListDiv.innerHTML = `<div class="loader" style="color: #ff5252;">${error.message}</div>`;
         }
-        
-        couponItem.appendChild(couponInfo);
-        couponItem.appendChild(button);
-        couponListDiv.appendChild(couponItem);
-    });
-    couponCountSpan.textContent = `총 ${coupons.length}개`;
-}
+    }
 
-couponListDiv.addEventListener('click', function(event) {
-    const button = event.target;
-    if (button.classList.contains('register-btn') && !button.classList.contains('used')) {
-        const couponCode = button.dataset.code;
-        const uid = uidInput.value.trim();
-
-        if (!uid) {
-            alert('UID를 먼저 입력해주세요.');
+    // 2. 쿠폰 목록을 화면에 그리는 함수
+    function renderCouponList() {
+        couponListDiv.innerHTML = ''; 
+        if (coupons.length === 0) {
+            couponListDiv.innerHTML = '<div class="loader">현재 사용 가능한 쿠폰이 없습니다.</div>';
             return;
         }
 
-        // [수정] UID와 쿠폰 코드를 조합한 고유 키로 로컬 스토리지에 저장합니다.
-        const key = `usedCoupon_${uid}_${couponCode}`;
-        localStorage.setItem(key, 'true');
-        
-        button.classList.add('used');
-        button.textContent = '등록 시도됨';
+        const uid = uidInput.value.trim();
 
-        const finalURL = `${baseURL}${uid}&code=${couponCode}`;
-        window.open(finalURL, '_blank');
+        coupons.forEach(coupon => {
+            const couponItem = document.createElement('div');
+            couponItem.className = 'coupon-item';
+
+            const couponInfo = document.createElement('div');
+            couponInfo.className = 'coupon-info';
+            couponInfo.textContent = coupon.name;
+
+            const button = document.createElement('button');
+            button.className = 'register-btn';
+            button.dataset.code = coupon.code;
+            
+            const key = `usedCoupon_${uid}_${coupon.code}`;
+            const isUsed = uid ? localStorage.getItem(key) : false;
+
+            if (isUsed) {
+                button.classList.add('used');
+                button.textContent = '등록 시도됨';
+                button.disabled = false;
+            } else {
+                if (uid) {
+                    button.disabled = false;
+                    button.textContent = '등록하러 가기';
+                } else {
+                    button.disabled = true;
+                    button.textContent = 'UID 입력 필요';
+                }
+            }
+            
+            couponItem.appendChild(couponInfo);
+            couponItem.appendChild(button);
+            couponListDiv.appendChild(couponItem);
+        });
+        couponCountSpan.textContent = `총 ${coupons.length}개`;
     }
-});
 
+    // 3. UID 입력에 실시간으로 반응하는 함수
+    uidInput.addEventListener('input', function() {
+        renderCouponList();
+    });
+
+    // 4. '등록' 버튼 클릭을 처리하는 함수
+    couponListDiv.addEventListener('click', function(event) {
+        const button = event.target;
+        if (button.classList.contains('register-btn') && !button.classList.contains('used')) {
+            const couponCode = button.dataset.code;
+            const uid = uidInput.value.trim();
+
+            if (!uid) {
+                alert('UID를 먼저 입력해주세요.');
+                return;
+            }
+            
+            const key = `usedCoupon_${uid}_${couponCode}`;
+            localStorage.setItem(key, 'true');
+            
+            button.classList.add('used');
+            button.textContent = '등록 시도됨';
+
+            const finalURL = `${baseURL}${uid}&code=${couponCode}`;
+            window.open(finalURL, '_blank');
+        }
+    });
     
+    // 페이지 시작 시 쿠폰 목록 불러오기
     initialize();
 </script>
-
 </body>
 </html>
