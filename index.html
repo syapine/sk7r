@@ -6,9 +6,18 @@
     <title>세나 리버스 쿠폰 자동 입력기</title>
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
+    
     body {
         font-family: 'Noto Sans KR', sans-serif;
-        background: linear-gradient(135deg, #0e0e1a, #0a0a14); /* 더 깊고 어두운 그라데이션 */
+        /* --- 배경 이미지 변경 --- */
+        background-image: url('images/seven2.jpg'); 
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        /* --- 배경 위에 어두운 필터 추가 --- */
+        background-color: rgba(0, 0, 0, 0.6);
+        background-blend-mode: multiply;
+
         color: #e0e0e0;
         margin: 0;
         padding: 20px;
@@ -22,15 +31,15 @@
     .container {
         width: 100%;
         max-width: 500px;
-        background: rgba(22, 36, 71, 0.5); /* 반투명 배경 */
-        backdrop-filter: blur(10px); /* 배경 흐림 효과 */
+        background: rgba(22, 36, 71, 0.6); /* 배경이 잘 보이도록 투명도 조정 */
+        backdrop-filter: blur(10px);
         border-radius: 20px;
         padding: 35px;
         box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
         border: 1px solid rgba(31, 64, 104, 0.4);
     }
     h1 {
-        color: #63d4ff; /* 좀 더 부드러운 청록색 */
+        color: #63d4ff; 
         text-align: center;
         margin-bottom: 5px;
         font-weight: 700;
@@ -39,7 +48,7 @@
     p {
         text-align: center;
         margin-bottom: 30px;
-        color: #a0aec0; /* 회색 톤 조정 */
+        color: #a0aec0;
     }
     .input-group {
         margin-bottom: 25px;
@@ -49,21 +58,27 @@
         margin-bottom: 10px;
         font-weight: 700;
     }
+
+    /* --- 입력창 스타일 개선 --- */
     input[type="text"] {
         width: 100%;
         padding: 15px;
-        background-color: rgba(26, 26, 46, 0.7);
+        background-color: rgba(10, 20, 40, 0.75); /* 더 어둡고 투명하게 */
         border: 1px solid rgba(31, 64, 104, 0.6);
         border-radius: 10px;
         color: #e0e0e0;
         font-size: 16px;
         box-sizing: border-box;
-        transition: border-color 0.3s ease;
+        /* 부드러운 전환 효과 추가 */
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
     }
+    /* 입력창 포커스 시 효과 */
     input[type="text"]:focus {
         outline: none;
         border-color: #63d4ff;
+        box-shadow: 0 0 15px rgba(99, 212, 255, 0.3); /* 은은한 네온 효과 */
     }
+
     .coupon-list-header {
         display: flex;
         justify-content: space-between;
@@ -151,10 +166,22 @@
 
     async function initialize() {
         try {
+            // 서버가 없는 경우를 대비해 임시 목업(mockup) 데이터를 사용합니다.
+            const mockCoupons = [
+                { name: '사전등록 보상 쿠폰', code: 'PRESKGB0315' },
+                { name: '론칭 기념 쿠폰', code: 'LAUNCHSKG77' },
+                { name: 'CM 루디의 선물', code: 'CMKGBLOVE' }
+            ];
+            coupons = mockCoupons; 
+            renderCouponList(coupons);
+
+            /*
+            // 실제 서버를 사용할 경우 아래 코드를 대신 사용하세요.
             const response = await fetch('/api/coupons');
             if (!response.ok) throw new Error('서버에서 쿠폰 목록을 가져오는데 실패했습니다.');
             coupons = await response.json();
             renderCouponList(coupons);
+            */
         } catch (error) {
             couponListDiv.innerHTML = `<div class="loader" style="color: #ff5252;">${error.message}</div>`;
         }
@@ -205,7 +232,7 @@
                 return;
             }
 
-            const finalURL = `${baseURL}${uid}&code=${couponCode}`;
+            const finalURL = `${baseURL}${uid}&couponId=${couponCode}`;
             
             window.open(finalURL, '_blank');
         }
