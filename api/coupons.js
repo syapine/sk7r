@@ -1,6 +1,6 @@
 import admin from 'firebase-admin';
 
-// Firebase Admin SDK 초기화 (이하 동일)
+// Firebase Admin SDK 초기화
 try {
   const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
   if (admin.apps.length === 0) {
@@ -15,21 +15,18 @@ try {
 const db = admin.firestore();
 
 export default async function handler(req, res) {
-  // CORS 허용 헤더 설정
+  // CORS 헤더
   res.setHeader('Access-Control-Allow-Origin', 'https://syapine.github.io');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  // ▼▼▼ 이 부분을 추가하면 좋습니다 ▼▼▼
-  // 브라우저가 본 요청을 보내기 전에 보내는 '사전 요청(OPTIONS)'에 대한 처리
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;
   }
+
   try {
-    // ## 바로 이 경로가 수정된 부분입니다. ##
     const couponsRef = db.collection('artifacts').doc('appid').collection('public').doc('data').collection('coupons');
-    
     const snapshot = await couponsRef.get();
 
     if (snapshot.empty) {
@@ -39,13 +36,17 @@ export default async function handler(req, res) {
     const couponList = [];
     snapshot.forEach(doc => {
       const couponData = doc.data();
-      if (couponData && couponData.code) {
+      // [수정] id와 code 필드만 가져옵니다.
+      if (couponData && couponData.code && couponData.id) {
         couponList.push({
-          name: couponData.code,
+          id: couponData.id,
           code: couponData.code
         });
       }
     });
+
+    // id(번호) 순서대로 정렬합니다.
+    couponList.sort((a, b) => a.id - b.id);
 
     res.status(200).json(couponList);
 
