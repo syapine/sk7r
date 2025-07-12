@@ -10,7 +10,7 @@
     body {
         font-family: 'Noto Sans KR', sans-serif;
         /* --- 배경 이미지 변경 --- */
-        background-image: url('images/seven2.jpg'); 
+        background-image: url('images/seven2png'); 
         background-size: cover;
         background-position: center;
         background-attachment: fixed;
@@ -166,22 +166,10 @@
 
     async function initialize() {
         try {
-            // 서버가 없는 경우를 대비해 임시 목업(mockup) 데이터를 사용합니다.
-            const mockCoupons = [
-                { name: '사전등록 보상 쿠폰', code: 'PRESKGB0315' },
-                { name: '론칭 기념 쿠폰', code: 'LAUNCHSKG77' },
-                { name: 'CM 루디의 선물', code: 'CMKGBLOVE' }
-            ];
-            coupons = mockCoupons; 
-            renderCouponList(coupons);
-
-            /*
-            // 실제 서버를 사용할 경우 아래 코드를 대신 사용하세요.
             const response = await fetch('/api/coupons');
             if (!response.ok) throw new Error('서버에서 쿠폰 목록을 가져오는데 실패했습니다.');
             coupons = await response.json();
             renderCouponList(coupons);
-            */
         } catch (error) {
             couponListDiv.innerHTML = `<div class="loader" style="color: #ff5252;">${error.message}</div>`;
         }
@@ -232,7 +220,7 @@
                 return;
             }
 
-            const finalURL = `${baseURL}${uid}&couponId=${couponCode}`;
+            const finalURL = `${baseURL}${uid}&code=${couponCode}`;
             
             window.open(finalURL, '_blank');
         }
