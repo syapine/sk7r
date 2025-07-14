@@ -1,6 +1,5 @@
 import admin from 'firebase-admin';
 
-// Firebase Admin SDK 초기화
 try {
   const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
   if (admin.apps.length === 0) {
@@ -15,7 +14,6 @@ try {
 const db = admin.firestore();
 
 export default async function handler(req, res) {
-  // CORS 헤더
   res.setHeader('Access-Control-Allow-Origin', 'https://syapine.github.io');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -36,8 +34,7 @@ export default async function handler(req, res) {
     const couponList = [];
     snapshot.forEach(doc => {
       const couponData = doc.data();
-      // [수정] id와 code 필드만 가져옵니다.
-      if (couponData && couponData.code && couponData.id) {
+        if (couponData && couponData.code && couponData.id) {
         couponList.push({
           id: couponData.id,
           code: couponData.code
@@ -45,7 +42,6 @@ export default async function handler(req, res) {
       }
     });
 
-    // id(번호) 순서대로 정렬합니다.
     couponList.sort((a, b) => a.id - b.id);
 
     res.status(200).json(couponList);
