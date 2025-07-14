@@ -141,11 +141,16 @@
     transform: none;
     box-shadow: none;
 }
-.creator-credit-inline {
-  color: #999;          /* 글자색 (기존 라벨보다 연하게) */
-  font-size: 0.8em;    /* 글자 크기 (라벨보다 약간 작게) */
-  font-weight: normal; /* 글자 굵기 (보통 굵기) */
-  margin-left: 8px;    /* 왼쪽 'UID' 글자와의 간격 */
+.input-group {
+  position: relative;
+}
+
+.creator-credit {
+  position: absolute; /* 부모 요소를 기준으로 위치를 자유롭게 설정 */
+  top: 0;             /* 부모 요소의 맨 위에서 0px 위치 */
+  right: 0;           /* 부모 요소의 오른쪽에서 0px 위치 */
+  font-size: 12px;
+  color: #a0aec0;    /* 설명 글씨와 비슷한 회색 */
 }
 </style>
 </head>
@@ -155,12 +160,11 @@
     <h1>세븐나이츠 리버스 쿠폰 자동 입력기</h1>
     <p>UID를 입력하고 등록할 쿠폰의 버튼을 누르세요.</p>
 
-    <div class="input-group">
-       <label for="user-id" class="block text-sm font-medium text-slate-700 mb-1">
-  회원번호 (UID) <span class="creator-credit-inline">by 샤피네</span>
-</label>
-        <input type="text" id="uid" placeholder="UID를 여기에 입력하세요">
-    </div>
+<div class="input-group">
+    <label for="uid">회원번호 (UID)</label>
+    <input type="text" id="uid" placeholder="UID를 여기에 입력하세요">
+    <span class="creator-credit">by 샤피네</span>
+</div>
 
     <div class="coupon-list-header">
         <h2>사용 가능한 쿠폰 목록</h2>
