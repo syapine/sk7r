@@ -9,12 +9,10 @@
     
     body {
         font-family: 'Noto Sans KR', sans-serif;
-        /* --- 배경 이미지 변경 --- */
         background-image: url('images/seven2.png'); 
         background-size: cover;
         background-position: center;
         background-attachment: fixed;
-        /* --- 배경 위에 어두운 필터 추가 --- */
         background-color: rgba(0, 0, 0, 0.6);
         background-blend-mode: multiply;
 
@@ -31,7 +29,7 @@
     .container {
         width: 100%;
         max-width: 500px;
-        background: rgba(22, 36, 71, 0.6); /* 배경이 잘 보이도록 투명도 조정 */
+        background: rgba(22, 36, 71, 0.6); 
         backdrop-filter: blur(10px);
         border-radius: 20px;
         padding: 35px;
@@ -59,20 +57,19 @@
         font-weight: 700;
     }
 
-    /* --- 입력창 스타일 개선 --- */
     input[type="text"] {
         width: 100%;
         padding: 15px;
-        background-color: rgba(10, 20, 40, 0.75); /* 더 어둡고 투명하게 */
+        background-color: rgba(10, 20, 40, 0.75); 
         border: 1px solid rgba(31, 64, 104, 0.6);
         border-radius: 10px;
         color: #e0e0e0;
         font-size: 16px;
         box-sizing: border-box;
-        /* 부드러운 전환 효과 추가 */
+ 
         transition: border-color 0.3s ease, box-shadow 0.3s ease;
     }
-    /* 입력창 포커스 시 효과 */
+
     input[type="text"]:focus {
         outline: none;
         border-color: #63d4ff;
@@ -134,7 +131,7 @@
         color: #b3c5ef;
         font-size: 18px;
     }
-/* --- [추가] 클릭한 버튼 스타일 --- */
+
 .register-btn.used {
     background: #4a5568;
     color: #a0aec0;
@@ -173,7 +170,7 @@
     const baseURL = 'https://coupon.netmarble.com/tskgb?playerId=';
     let coupons = [];
 
-    // 1. 서버에서 쿠폰 목록을 불러오는 함수
+
     async function initialize() {
         try {
             const response = await fetch('https://sk7r.vercel.app/api/coupons');
@@ -188,7 +185,7 @@
         }
     }
 
-    // 2. 쿠폰 목록을 화면에 그리는 함수
+
 function renderCouponList() {
     couponListDiv.innerHTML = '';
     if (coupons.length === 0) {
@@ -205,7 +202,7 @@ function renderCouponList() {
         const couponInfo = document.createElement('div');
         couponInfo.className = 'coupon-info';
 
-        // [수정] "번호. 쿠폰코드" 형식으로 텍스트를 표시합니다.
+
         couponInfo.textContent = `${coupon.id}. ${coupon.code}`;
 
         const button = document.createElement('button');
@@ -235,12 +232,11 @@ function renderCouponList() {
     });
     couponCountSpan.textContent = `총 ${coupons.length}개`;
 }
-    // 3. UID 입력에 실시간으로 반응하는 함수
+
     uidInput.addEventListener('input', function() {
         renderCouponList();
     });
 
-    // 4. '등록' 버튼 클릭을 처리하는 함수
     couponListDiv.addEventListener('click', function(event) {
         const button = event.target;
         if (button.classList.contains('register-btn') && !button.classList.contains('used')) {
@@ -263,7 +259,6 @@ function renderCouponList() {
         }
     });
     
-    // 페이지 시작 시 쿠폰 목록 불러오기
     initialize();
 </script>
 </body>
