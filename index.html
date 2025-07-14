@@ -141,6 +141,12 @@
     transform: none;
     box-shadow: none;
 }
+.creator-credit-inline {
+  color: #999;          /* 글자색 (기존 라벨보다 연하게) */
+  font-size: 0.8em;    /* 글자 크기 (라벨보다 약간 작게) */
+  font-weight: normal; /* 글자 굵기 (보통 굵기) */
+  margin-left: 8px;    /* 왼쪽 'UID' 글자와의 간격 */
+}
 </style>
 </head>
 <body>
@@ -150,7 +156,9 @@
     <p>UID를 입력하고 등록할 쿠폰의 버튼을 누르세요.</p>
 
     <div class="input-group">
-        <label for="uid">회원번호 (UID)</label>
+       <label for="user-id" class="block text-sm font-medium text-slate-700 mb-1">
+  회원번호 (UID) <span class="creator-credit-inline">by 샤피네</span>
+</label>
         <input type="text" id="uid" placeholder="UID를 여기에 입력하세요">
     </div>
 
