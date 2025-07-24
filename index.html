@@ -272,5 +272,18 @@ function renderCouponList() {
     
     initialize();
 </script>
+<script>
+    window.onload = function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const uid = urlParams.get('uid');
+        if (uid) {
+            const uidInput = document.getElementById('uid');
+            if (uidInput) {
+                uidInput.value = uid;
+                uidInput.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        }
+    };
+</script>
 </body>
 </html>
